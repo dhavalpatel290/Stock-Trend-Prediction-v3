@@ -71,8 +71,8 @@ def saveAllInCSV(putyear,putcmp,putmodel,node,epoch,companyName,EfficiencyToSave
     
     putfold='./'+str(putyear)+'/'+putcmp+'/'+putmodel+'/'
     path = putfold+'Results/Epoch_'+str(epoch)+'/Nodes_'+str(node)+'/'   # if folder doesn't exists then create new folder
-    print("Made folder : "+putfold)
-    print("Made folder : "+path)
+    #print("Made folder : "+putfold)
+    #print("Made folder : "+path)
     
     import os
     if not os.path.exists(path):
