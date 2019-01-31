@@ -611,8 +611,8 @@ for one_epoch in range(Start_Epoch,End_Epoch+add_epoch_gap,add_epoch_gap):
             #print("\n "+putstr)
             
             
-            
-            print("--> Completed -- Epoch "+str(one_epoch)+" Node "+str(one_node)+" MC "+str(one_mc*100))   
+            if int(one_mc*100) in [10,30,60,90]:
+                print("--> Completed -- Epoch "+str(one_epoch)+" Node "+str(one_node)+" MC "+str(one_mc*100))   
                 
             
             AllComputedEfficiency.append(oneeffi)
