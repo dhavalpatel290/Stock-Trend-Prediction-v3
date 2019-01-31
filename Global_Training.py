@@ -125,7 +125,7 @@ def GiveFoldersAccordingToCustomChoice(putyear,putcmp,putmodel,putcompany,putcus
 
 
     putfold='./'+str(putyear)+'/'+putcmp+'/'+putmodel+putfoldername
-    print("Made folder : "+putfold)
+    #print("Made folder : "+putfold)
     putfold_for_csv="./Dataset/"
     
     return putfold_for_csv,putfold,putinnu
