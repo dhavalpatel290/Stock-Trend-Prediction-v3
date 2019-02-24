@@ -71,8 +71,8 @@ def saveAllInCSV(putyear,putcmp,putmodel,node,epoch,companyName,EfficiencyToSave
     
     putfold='./'+str(putyear)+'/'+putcmp+'/'+putmodel+'/'
     path = putfold+'Results/Epoch_'+str(epoch)+'/Nodes_'+str(node)+'/'   # if folder doesn't exists then create new folder
-    print("Made folder : "+putfold)
-    print("Made folder : "+path)
+    #print("Made folder : "+putfold)
+    #print("Made folder : "+path)
     
     import os
     if not os.path.exists(path):
@@ -125,7 +125,7 @@ def GiveFoldersAccordingToCustomChoice(putyear,putcmp,putmodel,putcompany,putcus
 
 
     putfold='./'+str(putyear)+'/'+putcmp+'/'+putmodel+putfoldername
-    print("Made folder : "+putfold)
+    #print("Made folder : "+putfold)
     putfold_for_csv="./Dataset/"
     
     return putfold_for_csv,putfold,putinnu
@@ -319,6 +319,15 @@ def compute_effi(putmodelindex,putfoldername,putcustom,putoptimizer,putactivatio
     
     insort=np.argsort(newRel)
     #print(insort)
+    """
+    #LOGIC of np.argsort()
+    insort=np.argsort([1,2,3,4,5,6])
+    print(insort)
+    #Output: array([0, 1, 2, 3, 4, 5], dtype=int64)
+    insort=np.argsort([1,2,3,4,6,5])
+    print(insort)
+    #Output: array([0, 1, 2, 3, 5, 4], dtype=int64)
+    """
     
     
     removesecond=0
@@ -611,8 +620,8 @@ for one_epoch in range(Start_Epoch,End_Epoch+add_epoch_gap,add_epoch_gap):
             #print("\n "+putstr)
             
             
-            
-            print("--> Completed -- Epoch "+str(one_epoch)+" Node "+str(one_node)+" MC "+str(one_mc*100))   
+            if int(one_mc*100) in [10,30,60,90]:
+                print("--> Completed -- Epoch "+str(one_epoch)+" Node "+str(one_node)+" MC "+str(one_mc*100))   
                 
             
             AllComputedEfficiency.append(oneeffi)

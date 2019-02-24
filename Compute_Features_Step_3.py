@@ -22,9 +22,9 @@ def momentum(dataset):
         pos = i + 9
         momentumfeature.append(dataset[pos] - dataset[i])
     
-    print("Momentum Matrix: ")
-    print(np.array(momentumfeature).size)
-    print("\n")
+    #print("Momentum Matrix: ")
+    #print(np.array(momentumfeature).size)
+    #print("\n")
     ##print(momentumfeature)
           
     return momentumfeature
@@ -64,9 +64,9 @@ def A_D_oscillator(close_price, low_price, high_price, volume):
     for i in range(size-9):
         adoscillatorfeature.append(res1[i] - res2[i])
     
-    print("A/D Oscillator Matrix: ")
-    print(np.array(adoscillatorfeature).size)
-    print("\n")
+    #print("A/D Oscillator Matrix: ")
+    #print(np.array(adoscillatorfeature).size)
+    #print("\n")
     
     
     """
@@ -128,9 +128,9 @@ def getupdown(dataset):
             outputfeature.append(1)
         else:
             outputfeature.append(0)
-    print("Output Matrix: ")
-    print(np.array(outputfeature).size)
-    print("\n")
+    #print("Output Matrix: ")
+    #print(np.array(outputfeature).size)
+    #print("\n")
     ##print(outputfeature)
     #print("\n")
     
@@ -248,7 +248,7 @@ for onecsvfile in csvfiles:
     years=[]
     peryearmax=[]
     peryearmin=[]
-    
+    goneToNewLogic=0
     initial=yearToStart
     for i in range(10):
         putstr='01-01-'+str(initial)+'-TO-31-12-'+str(initial)+onecsvfile
@@ -259,17 +259,8 @@ for onecsvfile in csvfiles:
     for year in years:
         putasmax,putasmin,df,stock=compute_stockstat(year+'.csv')
         df=df.reset_index()
-        
-        
-        #frames = [df, df_mom_ado]
-        #final_result = pd.concat(frames)
-        #final=pd.merge(df, df_mom_ado, right_index=True, left_index=True)
-        
-        #bigdata = df.append(df_mad)
-        
-        #print(df)
-        
         new_df=pd.read_csv("./Dataset/NewFeature_"+year+".csv")
+        #print(new_df)
         add_new_feature=[]
         for i in range(10):
             add_new_feature.append(-1000)
@@ -277,15 +268,12 @@ for onecsvfile in csvfiles:
         ##---------------------------------
         ##---------------------------------
         ##---------------------------------
-        #prevTrend=0   # The Feature Encoding
-        
+        #prevTrend=0   # The Feature Encoding 
         #prevTrend=1 
         prevTrend=randint(0, 1) 
         for i in range(10,new_df.shape[0]):
-
             gotsum=0
-            #print("-- for date :"+new_df.ix[i,0])
-            
+            #print("-- for date :"+new_df.ix[i,0])            
             for j in range(10):
                 #print(i-j-1)
                 #print("\t\t-- for date :"+new_df.ix[i-j-1,0])
@@ -302,11 +290,16 @@ for onecsvfile in csvfiles:
             else:
                 generatedRandom=random.random()
                 #print("--generated : "+str(generatedRandom))
-                if(generatedRandom>=0.5):
+                goneToNewLogic=goneToNewLogic+1
+                dynamicThresold=new_df['MinMax_Feature'][i]
+                #print(dynamicThresold)
+                #print(new_df['MinMax_Feature'][i],i)
+                if(generatedRandom>=dynamicThresold):
                     if(prevTrend==1):
                         prevTrend=0
                     else:
                         prevTrend=1
+                    #print("going")
                 avgsum=prevTrend
             add_new_feature.append(avgsum)
             
@@ -314,28 +307,18 @@ for onecsvfile in csvfiles:
         ##---------------------------------
         ##---------------------------------
         ##---------------------------------
-          
-        #print("Going for label")
+        print("For the year ",year,"the new logic consumed ",goneToNewLogic," days ")
+        goneToNewLogic=0
         
-        
-        
-        #print(df.shape[0])
-        labels = ['New_Feature']
-        
-        #print(add_new_feature)
-        
-        add_this = pd.DataFrame(add_new_feature, columns=labels)
-        
-        #print("here")
-        df = pd.concat([df, add_this], axis=1)
-        
-        #print(df)
-        
-        #print(stock.shape)
         X=compute_mom_ado_fun(year+'.csv')    
         X=np.array(X).T
         df_mad= pd.DataFrame(X,columns=['Momentum','ADOsc', 'OpenPrice', 'UpDown'])
-        df_result = pd.concat([df, df_mad], axis=1)
+        df = pd.concat([df, df_mad], axis=1)
+        
+        labels = ['New_Feature']
+        add_this_last = pd.DataFrame(add_new_feature, columns=labels)
+        df_result = pd.concat([df, add_this_last], axis=1)
+        
         #print(df_result)
         df_result=df_result.iloc[10:,:]
         

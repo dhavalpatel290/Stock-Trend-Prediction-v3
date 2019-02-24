@@ -134,7 +134,7 @@ def compute_all_results(mode,noofepoch,noofnode,fold):
 #-------------------------------------------
 
 
-for modelin in range(3,4):
+for modelin in range(1,2):
 
     
     noofepoch=[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000]
@@ -146,7 +146,7 @@ for modelin in range(3,4):
     mode=1    # MODE 0 FOR Training # MODE 1 FOR Testing #  MODE 2 FOR AVG   
     putnode=10
     modelindex=modelin    # 1 for random weights 2 for pearson 3 for pearson absolute 
-    cmpindex=6
+    cmpindex=5
     putyear=2008    ## 2003 or 2008
     #-------------------------------------------
     #-------------------------------------------
