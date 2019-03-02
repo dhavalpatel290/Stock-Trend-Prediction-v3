@@ -239,7 +239,7 @@ yearToStart=2008
 csvfiles=['RELIANCEEQN','INFYEQN','HDFCEQN','DRREDDYEQN']
 #csvfiles=['INFYEQN']
 #csvfiles=['RELIANCEEQN']
-
+random.seed(100)
 #------------------------------------
 #------------------------------------
 #------------------------------------
@@ -270,6 +270,7 @@ for onecsvfile in csvfiles:
         ##---------------------------------
         #prevTrend=0   # The Feature Encoding 
         #prevTrend=1 
+        
         prevTrend=randint(0, 1) 
         for i in range(10,new_df.shape[0]):
             gotsum=0

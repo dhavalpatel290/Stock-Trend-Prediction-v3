@@ -529,8 +529,10 @@ modelindex=int(gotParameters[2])    # 1 for random weights 2 for pearson 3 for p
 #modelindex=3    # 1 for random weights 2 for pearson 3 for pearson absolute 
 #cmpindex=1   # 1 for Reliance 2 for Infosys
 
-putcmp=['','Reliance','Infosys','SBI','SunPharma','HDFC','DrReddy']   # Reliance, Infosy
-putcmp_stockname=['','RELIANCEEQN','INFYEQN','SBINEQN','SUNPHARMAEQN','HDFCEQN','DRREDDYEQN']
+#putcmp=['','Reliance','Infosys','SBI','SunPharma','HDFC','DrReddy']   # Reliance, Infosy
+putcmp=['','Reliance','Infosys','HDFC','DrReddy']   # Reliance, Infosy
+#putcmp_stockname=['','RELIANCEEQN','INFYEQN','SBINEQN','SUNPHARMAEQN','HDFCEQN','DRREDDYEQN']
+putcmp_stockname=['','RELIANCEEQN','INFYEQN','HDFCEQN','DRREDDYEQN']
 putmodel=['','Random Weights','Pearson Weights','Pearson Weights ABSOLUTE']
 
 

@@ -146,7 +146,7 @@ for modelin in range(1,2):
     mode=1    # MODE 0 FOR Training # MODE 1 FOR Testing #  MODE 2 FOR AVG   
     putnode=10
     modelindex=modelin    # 1 for random weights 2 for pearson 3 for pearson absolute 
-    cmpindex=5
+    cmpindex=6
     putyear=2008    ## 2003 or 2008
     #-------------------------------------------
     #-------------------------------------------
@@ -237,8 +237,8 @@ for modelin in range(1,2):
         f=[]
         #f.append(putstr)
         #putnum='%.3f' % result[xi][xj]
-        putacc=str(round(result[xi][xj],2))
-        putfmea=str(round(fmea[xi][xj]*100,2))
+        putacc=round(result[xi][xj],2)
+        putfmea=round(fmea[xi][xj]*100,2)
        
         
         f.append(putstr)
@@ -249,8 +249,8 @@ for modelin in range(1,2):
         print(putacc)
         print(putfmea)
         saveFile.write("\n\n"+putstr+"\n\t")    
-        saveFile.write("\n\t"+putacc)
-        saveFile.write("\n\t"+putfmea)
+        saveFile.write("\n\t"+str(putacc))
+        saveFile.write("\n\t"+str(putfmea))
         
         
     saveFile.close()
@@ -259,14 +259,27 @@ for modelin in range(1,2):
     
     
     
+    ansAdd=ans
+    ans=pd.DataFrame(ans,columns = [' neurons : epochs : mc & lr = 0.1','Accuracy','F-Measure'])
     
+    #print(ans)
+    meanAcc=ans["Accuracy"].mean()
+    meanFMea=ans["F-Measure"].mean()
+    ansAdd.append(['Mean',meanAcc,meanFMea])
     
-    
-    
-    
-    
-    
-    ans=pd.DataFrame(ans)
+    medianAcc=ans["Accuracy"].median()
+    medianFMea=ans["F-Measure"].median()
+    ansAdd.append(['Median',medianAcc,medianFMea])
+
+    #print(ansAdd)
+    stdAcc=ans["Accuracy"].std()
+    stdFMea=ans["F-Measure"].std()
+    ansAdd.append(['Standard deviation',stdAcc,stdFMea])
+
+
+    ans=pd.DataFrame(ansAdd)
+       
+
     
     putheader=[' neurons : epochs : mc & lr = 0.1','Accuracy','F-Measure']
     
@@ -276,4 +289,6 @@ for modelin in range(1,2):
         ans.to_csv(putfold+'/All_Results/Top_'+str(getTop)+'_Of_Testing.csv', sep=',',index=False,header=putheader) 
     else:
         ans.to_csv(putfold+'/All_Results/Top_'+str(getTop)+'_Of_Both.csv', sep=',',index=False,header=putheader) 
+        
+        
         
