@@ -239,7 +239,6 @@ yearToStart=2008
 csvfiles=['RELIANCEEQN','INFYEQN','HDFCEQN','DRREDDYEQN']
 #csvfiles=['INFYEQN']
 #csvfiles=['RELIANCEEQN']
-random.seed(100)
 #------------------------------------
 #------------------------------------
 #------------------------------------
@@ -257,6 +256,12 @@ for onecsvfile in csvfiles:
         initial=initial+1
     
     for year in years:
+        #####################
+        #####################
+        random.seed(200)
+        #####################
+        #####################
+        
         putasmax,putasmin,df,stock=compute_stockstat(year+'.csv')
         df=df.reset_index()
         new_df=pd.read_csv("./Dataset/NewFeature_"+year+".csv")
