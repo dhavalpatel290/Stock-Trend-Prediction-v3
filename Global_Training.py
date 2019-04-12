@@ -532,7 +532,7 @@ def compute_effi(putmodelindex,putfoldername,putcustom,putoptimizer,putactivatio
     precision=(cm[0][0]/float(cm[0][1]+cm[0][0]))
     recall=(cm[0][0]/float(cm[1][0]+cm[0][0]))
     f_measure=(2*precision*recall)/float(precision+recall)
-    print(effi)
+    #print(effi)
     
     # serialize model to JSON
     #hiddennode_epoch_decay_learningrate
