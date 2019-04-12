@@ -258,7 +258,7 @@ for onecsvfile in csvfiles:
     for year in years:
         #####################
         #####################
-        random.seed(250)
+        random.seed(50)
         #####################
         #####################
         

@@ -14,6 +14,7 @@ import os
 import scipy
 import numpy as np
 import pandas as pd
+from tqdm._tqdm_notebook import tqdm_notebook
 from sklearn.metrics import confusion_matrix
 from sklearn.datasets import fetch_mldata
 from sklearn import metrics
@@ -22,6 +23,8 @@ from keras import optimizers
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
 from keras.models import model_from_json
 import os
 import random
@@ -259,7 +262,43 @@ def save_data_mapping_with_dates(train_in,test_in,train_out,test_out):
     
     return without_date_train_in,without_date_test_in,train_out,test_out
     
-            
+   
+
+
+def trim_dataset(mat,batch_size):
+    """
+    trims dataset to a size that's divisible by BATCH_SIZE
+    """
+    no_of_rows_drop = mat.shape[0]%batch_size
+    if no_of_rows_drop > 0:
+        return mat[:-no_of_rows_drop]
+    else:
+        return mat
+
+
+def build_timeseries(mat_in, mat_out,TIME_STEPS):
+    """
+    Converts ndarray into timeseries format and supervised data format. Takes first TIME_STEPS
+    number of rows as input and sets the TIME_STEPS+1th data as corresponding output and so on.
+    :param mat: ndarray which holds the dataset
+    :param y_col_index: index of column which acts as output
+    :return: returns two ndarrays-- input and output in format suitable to feed
+    to LSTM.
+    """
+    # total number of time-series samples would be len(mat) - TIME_STEPS
+    dim_0 = mat_in.shape[0] - TIME_STEPS
+    dim_1 = mat_in.shape[1]
+    x = np.zeros((dim_0, TIME_STEPS, dim_1))
+    y = np.zeros((dim_0,))
+    #print("dim_0",dim_0)
+    for i in tqdm_notebook(range(dim_0)):
+        x[i] = mat_in[i:TIME_STEPS+i]
+        y[i] = mat_out[TIME_STEPS+i]
+#         if i < 10:
+#           print(i,"-->", x[i,-1,:], y[i])
+    #print("length of time-series i/o",x.shape,y.shape)
+    return x, y
+         
 
 def compute_effi(putmodelindex,putfoldername,putcustom,putoptimizer,putactivation,putlr,putmc,csvfile,allnu,nu,train_in,test_in,train_out,test_out,noofnodes,noofepoch,noofbatchsize,noofsplitinratio):
     
@@ -369,15 +408,29 @@ def compute_effi(putmodelindex,putfoldername,putcustom,putoptimizer,putactivatio
     # Initialising the ANN
     #return cm,effi,precision,recall,f_measure,OpenArray,final,stime,etime,train_in,test_in,final_train_in,corel_full_matrix
     
+    TIME_STEPS=10
+    #print("Are any NaNs present in train/test matrices?",np.isnan(train_in).any(), np.isnan(train_in).any())
+    train_in, train_out = build_timeseries(train_in,train_out, TIME_STEPS)
+    train_in = trim_dataset(train_in, noofbatchsize)
+    train_out = trim_dataset(train_out, noofbatchsize)
+    #print("Batch trimmed size",train_in.shape, train_out.shape)
     classifier = Sequential()    
     # Adding the input layer and the first hidden layer
-    classifier.add(Dense(activation = putactivation,kernel_initializer = 'uniform',input_dim = 10,units = noofnodes))
+    #Old -- classifier.add(Dense(activation = putactivation,kernel_initializer = 'uniform',input_dim = 10,units = noofnodes))
+    classifier.add(LSTM(noofnodes, batch_input_shape=(noofbatchsize, TIME_STEPS, train_in.shape[2]),
+                        dropout=0.0, recurrent_dropout=0.0, stateful=True, return_sequences=True,
+                        kernel_initializer='random_uniform'))
+    classifier.add(Dropout(0.2))
+    classifier.add(LSTM(50, dropout=0.0))
+    classifier.add(Dropout(0.4))
+    classifier.add(Dense(10,activation='relu'))
+    classifier.add(Dense(kernel_initializer = 'uniform',activation = 'sigmoid',units= 1))     
     # Adding the output layer
-    classifier.add(Dense( kernel_initializer = 'uniform',activation = 'sigmoid',units= 1))
     # Compiling the ANN
     #pl("here done making Model")
     #print('--------')
     
+      
     if(putcustom):
         if(putoptimizer=='sgd'):
                 sgd = optimizers.SGD(lr=putlr, momentum=putmc)
@@ -451,25 +504,35 @@ def compute_effi(putmodelindex,putfoldername,putcustom,putoptimizer,putactivatio
     classifier.save_weights(nu+"Initial_Training_Assigned_ANNweight.h5")
     #pl("here Done geting initial weights and saving in file")
     # Fitting the ANN to the Training set
-    classifier.fit(train_in, train_out,batch_size = noofbatchsize, epochs =noofepoch,verbose=0)      
+    test_in, test_out = build_timeseries(test_in,test_out, TIME_STEPS)
+    x_val, x_test_t = np.split(trim_dataset(test_in, noofbatchsize),2)
+    y_val, y_test_t = np.split(trim_dataset(test_out, noofbatchsize),2)
+    #print("Test size", x_test_t.shape, y_test_t.shape, x_val.shape, y_val.shape)
+
+    classifier.fit(train_in, train_out, epochs=noofepoch, batch_size=noofbatchsize, verbose=0,
+                        shuffle=False, validation_data=(trim_dataset(x_val, noofbatchsize),
+                        trim_dataset(y_val, noofbatchsize)))
+    #classifier.fit(train_in, train_out,batch_size = noofbatchsize, epochs =noofepoch,verbose=1)      
     #pl("here Done fiting")
     import time
     etime = int(round(time.time() * 1000))
-    
     # Predicting the Test set results
-    y_pred = classifier.predict(test_in)
-    #print(y_pred)
     
+    y_pred = classifier.predict(trim_dataset(x_test_t, noofbatchsize), batch_size=noofbatchsize)
+    y_pred = y_pred.flatten()
+    y_test_t = trim_dataset(y_test_t, noofbatchsize)
+    #print(y_pred)
     y_pred = (y_pred > 0.5)
-    #print(y_pred)
-    
-    cm=confusion_matrix(test_out, y_pred)
+    #print(y_pred)    
+    #print("\n\n\n###########  here")
+    cm=confusion_matrix(y_test_t, y_pred)
     #print(cm)
+    #print("\n\n\n###########  here")    
     effi=((cm[0][0]+cm[1][1])*100)/float(cm[0][0]+cm[1][1]+cm[1][0]+cm[0][1])
     precision=(cm[0][0]/float(cm[0][1]+cm[0][0]))
     recall=(cm[0][0]/float(cm[1][0]+cm[0][0]))
     f_measure=(2*precision*recall)/float(precision+recall)
-    #print(effi)
+    print(effi)
     
     # serialize model to JSON
     #hiddennode_epoch_decay_learningrate
@@ -526,7 +589,7 @@ gotParameters=sys.argv
 cmpindex=int(gotParameters[1])   # 1 for Reliance 2 for Infosys
 modelindex=int(gotParameters[2])    # 1 for random weights 2 for pearson 3 for pearson absolute 
 
-#modelindex=3    # 1 for random weights 2 for pearson 3 for pearson absolute 
+#modelindex=1    # 1 for random weights 2 for pearson 3 for pearson absolute 
 #cmpindex=1   # 1 for Reliance 2 for Infosys
 
 #putcmp=['','Reliance','Infosys','SBI','SunPharma','HDFC','DrReddy']   # Reliance, Infosy
@@ -543,9 +606,9 @@ End_Node=int(gotParameters[6])
 add_epoch_gap=int(gotParameters[7])
 putyear=int(gotParameters[8])
 
-#Start_Epoch=10
 #End_Epoch=10
 #Start_Node=10
+#Start_Epoch=10
 #End_Node=10
 #add_epoch_gap=10
 #putyear=2008
@@ -570,7 +633,7 @@ stockname=putcmp_stockname[cmpindex]
 #            putmc.append(one_mc)
     
 
-noofbatchsize=10 #BSZ BatchSize
+noofbatchsize=30 #BSZ BatchSize
 noofsplitinratio=2 #SR SplitInRatio
 putlr=0.1
 putactivation='relu'   # tanh OR relu

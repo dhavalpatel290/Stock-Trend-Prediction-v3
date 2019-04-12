@@ -146,11 +146,11 @@ for modelin in range(1,2):
     mode=1    # MODE 0 FOR Training # MODE 1 FOR Testing #  MODE 2 FOR AVG   
     putnode=10
     modelindex=modelin    # 1 for random weights 2 for pearson 3 for pearson absolute 
-    cmpindex=6
+    cmpindex=4
     putyear=2008    ## 2003 or 2008
     #-------------------------------------------
     #-------------------------------------------
-    putcmp=['','Reliance','Infosys','SBI','SunPharma','HDFC','DrReddy']   # Reliance, Infosy
+    putcmp=['','Reliance','Infosys','HDFC','DrReddy']   # Reliance, Infosy
     putmodel=['','Random Weights','Pearson Weights','Pearson Weights ABSOLUTE']
     
     
