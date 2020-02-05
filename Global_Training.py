@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 from tqdm._tqdm_notebook import tqdm_notebook
 from sklearn.metrics import confusion_matrix
-from sklearn.datasets import fetch_mldata
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from keras import optimizers
